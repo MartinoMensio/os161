@@ -7,6 +7,9 @@ build/
 # and by executing "bmake depend", "bmake", "bmake install" inside kern/compile/<target> directory
 kern/compile/
 
+# userlad folder (this folder must not be deleted, is included in previous commit)
+userland/
+
 # defs.mk is a file auto-generated from configure
 defs.mk
 
