@@ -51,6 +51,12 @@
 #include <version.h>
 #include "autoconf.h"  // for pseudoconfig
 
+#include "opt-hello.h"
+
+#if OPT_HELLO
+void hello(void);  // prototype must be declared
+#endif
+
 
 /*
  * These two pieces of data are maintained by the makefiles and build system.
@@ -209,6 +215,10 @@ void
 kmain(char *arguments)
 {
 	boot();
+
+#if OPT_HELLO
+  hello();
+#endif
 
 	menu(arguments);
 

@@ -385,6 +385,14 @@ file      main/main.c
 file      main/menu.c
 
 ########################################
+#                hello                 #
+########################################
+
+defoption hello             # definition of hello option
+optfile hello main/hello.c  # this file will be included only when hello option is enabled
+
+
+########################################
 #                                      #
 #             Filesystems              #
 #                                      #
