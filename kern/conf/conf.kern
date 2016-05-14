@@ -377,6 +377,12 @@ file      syscall/loadelf.c
 file      syscall/runprogram.c
 file      syscall/time_syscalls.c
 
+########################################
+#              syscall                 #
+########################################
+defoption syscall
+optfile syscall syscall/stdio_syscalls.c
+
 #
 # Startup and initialization
 #
