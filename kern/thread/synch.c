@@ -259,7 +259,18 @@ cv_create(const char *name)
                 return NULL;
         }
 
-        // add stuff here as needed
+#if OPT_THREADS
+        spinlock_init(&cv->cv_lock);  // init the spinlock
+        cv->cv_wchan = wchan_create(cv->cv_name); // create a wchan
+        // check if wchan was created successfully
+        if (cv->cv_wchan == NULL) {
+	        kfree(cv->cv_name);
+	        kfree(cv);
+	        return NULL;
+        }
+        cv->sleeping = 0; // at creation, no one is sleeping
+        cv->tokens = 0; // at creation, no threads can wake up
+#endif
 
         return cv;
 }
@@ -269,7 +280,10 @@ cv_destroy(struct cv *cv)
 {
         KASSERT(cv != NULL);
 
-        // add stuff here as needed
+#if OPT_THREADS
+        spinlock_cleanup(&cv->cv_lock);
+        wchan_destroy(cv->cv_wchan);
+#endif
 
         kfree(cv->cv_name);
         kfree(cv);
@@ -278,23 +292,58 @@ cv_destroy(struct cv *cv)
 void
 cv_wait(struct cv *cv, struct lock *lock)
 {
-        // Write this
+#if OPT_THREADS
+        KASSERT(cv != NULL);
+        KASSERT(lock!= NULL);
+        KASSERT(lock_do_i_hold(lock));  // the thread must hold the lock
+        spinlock_acquire(&cv->cv_lock);
+        lock_release(lock); // step 1: release the external lock
+        cv->sleeping++; // make other threads know i am sleeping
+        do {
+          wchan_sleep(cv->cv_wchan, &cv->cv_lock);  // go to sleep
+        } while(cv->tokens < 1); // if there are no tokens, go back to sleep
+        KASSERT(cv->tokens > 0);
+        cv->tokens--; // use a token
+        KASSERT(cv->sleeping > 0);
+        cv->sleeping--;  // and this process is no more sleeping
+        spinlock_release(&cv->cv_lock);
+        lock_acquire(lock); // reacquire the lock (outside of critical section to avoid panic)
+#else
         (void)cv;    // suppress warning until code gets written
         (void)lock;  // suppress warning until code gets written
+#endif
 }
 
 void
 cv_signal(struct cv *cv, struct lock *lock)
 {
-        // Write this
+#if OPT_THREADS
+  KASSERT(cv != NULL);
+  KASSERT(lock != NULL);
+  spinlock_acquire(&cv->cv_lock);
+  if(cv->tokens < cv->sleeping) {
+    cv->tokens++; // generate a token
+  }
+  wchan_wakeone(cv->cv_wchan, &cv->cv_lock); // wakeup a single thread
+  spinlock_release(&cv->cv_lock);
+#else
 	(void)cv;    // suppress warning until code gets written
 	(void)lock;  // suppress warning until code gets written
+#endif
 }
 
 void
 cv_broadcast(struct cv *cv, struct lock *lock)
 {
-	// Write this
+#if OPT_THREADS
+  KASSERT(cv != NULL);
+  KASSERT(lock != NULL);
+  spinlock_acquire(&cv->cv_lock);
+  cv->tokens = cv->sleeping;  // generate a token for each thread sleeping
+  wchan_wakeall(cv->cv_wchan, &cv->cv_lock);  // wake all of them
+  spinlock_release(&cv->cv_lock);
+#else
 	(void)cv;    // suppress warning until code gets written
 	(void)lock;  // suppress warning until code gets written
+#endif
 }
