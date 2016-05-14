@@ -37,6 +37,9 @@
 
 #include <spinlock.h>
 
+// locks and condition variables will have a working implementation only when option threads is enabled
+#include "opt-threads.h"
+
 /*
  * Dijkstra-style semaphore.
  *
@@ -76,6 +79,12 @@ struct lock {
         char *lk_name;
         // add what you need here
         // (don't forget to mark things volatile as needed)
+#if OPT_THREADS
+        volatile int locked; // status of the lock
+        struct wchan *lk_wchan;
+        struct spinlock lk_lock;
+        volatile struct thread* thread_with_lock;
+#endif
 };
 
 struct lock *lock_create(const char *name);

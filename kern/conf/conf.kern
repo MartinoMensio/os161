@@ -391,6 +391,11 @@ file      main/menu.c
 defoption hello             # definition of hello option
 optfile hello main/hello.c  # this file will be included only when hello option is enabled
 
+########################################
+#               threads                #
+########################################
+
+defoption threads           # definition of threads option
 
 ########################################
 #                                      #
