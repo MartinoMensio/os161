@@ -382,6 +382,7 @@ file      syscall/time_syscalls.c
 ########################################
 defoption syscall
 optfile syscall syscall/stdio_syscalls.c
+optfile syscall syscall/exit_syscall.c
 
 #
 # Startup and initialization

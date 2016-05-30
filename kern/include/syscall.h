@@ -61,6 +61,6 @@ int sys___time(userptr_t user_seconds, userptr_t user_nanoseconds);
 
 ssize_t sys_write(int fd, const void *buf, size_t count);
 ssize_t sys_read(int fd, const void *buf, size_t count);
-int sys_exit(int code);
+void sys_exit(int code);
 
 #endif /* _SYSCALL_H_ */

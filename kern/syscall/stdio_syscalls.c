@@ -65,9 +65,3 @@ ssize_t sys_read(int fd, const void *buf, size_t buflen) {
 
   return result;
 }
-
-int sys_exit(int code) {
-  (void)code;
-  thread_exit();
-  return 0;
-}

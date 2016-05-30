@@ -106,6 +106,7 @@ struct thread {
 	 */
 
 	/* add more here as needed */
+  int exitCode;
 };
 
 /*
